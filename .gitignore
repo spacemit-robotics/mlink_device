@@ -1,0 +1,34 @@
+# Local / out-of-tree CMake builds
+build/
+build-*/
+cmake-build-*/
+out/
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+_deps/
+Testing/
+
+# Object / archive / shared libs (if produced next to sources)
+*.o
+*.a
+*.so
+*.so.*
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+*.tmp
+*~

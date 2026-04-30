@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>mlink_device</name>
+  <version>0.1.0</version>
+  <description>M-Link protocol device-side implementation (JSON over serial, libcjson)</description>
+  <system_depend check="pkg-config --exists libcjson">libcjson-dev</system_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
