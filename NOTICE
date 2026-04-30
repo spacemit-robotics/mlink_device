@@ -1,0 +1,22 @@
+SpacemiT mlink Device (C)
+Copyright 2026 SpacemiT (Hangzhou) Technology Co. Ltd.
+
+This product includes software developed at
+SpacemiT (Hangzhou) Technology Co. Ltd. (https://www.spacemit.com/).
+
+---------------------------------------------------------------------------
+Third-party Software Notices:
+---------------------------------------------------------------------------
+
+When built with optional JSON support enabled (see CMakeLists.txt: libcjson
+via pkg-config, `HAVE_CJSON`), this component links against third-party
+software supplied by the target system or SDK, not vendored in this tree.
+
+1. cJSON (often packaged as libcjson)
+   https://github.com/DaveGamble/cJSON
+   Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
+   Licensed under the MIT License.
+
+Runtime dependencies such as the C library, pthreads, and optional libm are
+provided by the platform toolchain; refer to your OS or cross-compilation SDK
+for their notices.
