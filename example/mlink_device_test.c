@@ -8,6 +8,8 @@
 
 #include <mlink.h>
 
+#define DANCE_DURATION_MS (120 * 1000)
+
 static volatile int g_base_running = 0;
 static volatile int g_stop_requested = 0;
 static pthread_mutex_t g_base_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -154,8 +156,8 @@ static struct mlink_return_value dance_cb(
     (void)props;
     (void)user_ctx;
 
-    printf("[dance] start (30s)\n");
-    start_base_motion("dance", 30000);
+    printf("[dance] start (%ds)\n", DANCE_DURATION_MS / 1000);
+    start_base_motion("dance", DANCE_DURATION_MS);
     return mlink_return_string("dance started");
 }
 
@@ -205,7 +207,7 @@ static void register_dance_tool(mlink_server_t *server) {
 
     tool = mlink_tool_create(
         "dance",
-        "Long-running dance action (~30s). Use base_move(direction=stop) to interrupt.",
+        "Long-running dance action (~120s). Use base_move(direction=stop) to interrupt.",
         props,
         dance_cb,
         NULL,
