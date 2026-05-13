@@ -170,12 +170,12 @@ static void *base_motion_thread(void *arg) {
 
     free(arg);
 
-    printf("[base_move] async start: direction=%s duration_ms=%d\n",
+    printf("[motion] async start: direction=%s duration_ms=%d\n",
             task.direction, task.duration_ms);
 
     while (elapsed_ms < task.duration_ms) {
         if (g_stop_requested) {
-            printf("[base_move] async stop requested\n");
+            printf("[motion] async stop requested\n");
             break;
         }
         if (strcmp(task.direction, "dance") == 0) {
@@ -185,7 +185,7 @@ static void *base_motion_thread(void *arg) {
         elapsed_ms += tick_ms;
     }
 
-    printf("[base_move] async done\n");
+    printf("[motion] async done\n");
     g_base_running = 0;
     return NULL;
 }
@@ -205,7 +205,7 @@ static void start_base_motion(const char *direction, int duration_ms) {
     task = (struct motion_task *)malloc(sizeof(*task));
     if (!task) {
         pthread_mutex_unlock(&g_base_mutex);
-        printf("[base_move] failed to allocate task\n");
+        printf("[motion] failed to allocate task\n");
         return;
     }
 
@@ -218,7 +218,7 @@ static void start_base_motion(const char *direction, int duration_ms) {
     if (pthread_create(&g_base_thread, NULL, base_motion_thread, task) != 0) {
         g_base_running = 0;
         free(task);
-        printf("[base_move] failed to create worker thread\n");
+        printf("[motion] failed to create worker thread\n");
     } else {
         g_base_thread_valid = true;
     }
@@ -233,43 +233,59 @@ static void request_stop_base_motion(void) {
     pthread_mutex_unlock(&g_base_mutex);
 }
 
-static struct mlink_return_value base_move_cb(
+static struct mlink_return_value move_forward_cb(
     const mlink_property_list_t *props,
     void *user_ctx) {
-    const char *dir;
-
+    (void)props;
     (void)user_ctx;
 
-    dir = mlink_property_list_get_string(props, "direction");
-    if (!dir) {
-        printf("[base_move] no 'direction' provided\n");
-        return mlink_return_string("missing direction");
-    }
+    printf("[move_forward] start\n");
+    start_base_motion("forward", 500);
+    return mlink_return_string("move forward started");
+}
 
-    printf("[base_move] direction = %s\n", dir);
+static struct mlink_return_value move_backward_cb(
+    const mlink_property_list_t *props,
+    void *user_ctx) {
+    (void)props;
+    (void)user_ctx;
 
-    if (strcmp(dir, "forward") == 0) {
-        printf("  -> action: FORWARD\n");
-        start_base_motion("forward", 500);
-    } else if (strcmp(dir, "backward") == 0) {
-        printf("  -> action: BACKWARD\n");
-        start_base_motion("backward", 500);
-    } else if (strcmp(dir, "left") == 0) {
-        printf("  -> action: LEFT\n");
-        start_base_motion("left", 500);
-    } else if (strcmp(dir, "right") == 0) {
-        printf("  -> action: RIGHT\n");
-        start_base_motion("right", 500);
-    } else if (strcmp(dir, "stop") == 0) {
-        printf("  -> action: STOP\n");
-        request_stop_base_motion();
-        return mlink_return_string("base_move stopped");
-    } else {
-        printf("  -> unknown direction, no action\n");
-        return mlink_return_string("unknown direction");
-    }
+    printf("[move_backward] start\n");
+    start_base_motion("backward", 500);
+    return mlink_return_string("move backward started");
+}
 
-    return mlink_return_string("base_move started");
+static struct mlink_return_value turn_left_cb(
+    const mlink_property_list_t *props,
+    void *user_ctx) {
+    (void)props;
+    (void)user_ctx;
+
+    printf("[turn_left] start\n");
+    start_base_motion("left", 500);
+    return mlink_return_string("turn left started");
+}
+
+static struct mlink_return_value turn_right_cb(
+    const mlink_property_list_t *props,
+    void *user_ctx) {
+    (void)props;
+    (void)user_ctx;
+
+    printf("[turn_right] start\n");
+    start_base_motion("right", 500);
+    return mlink_return_string("turn right started");
+}
+
+static struct mlink_return_value stop_motion_cb(
+    const mlink_property_list_t *props,
+    void *user_ctx) {
+    (void)props;
+    (void)user_ctx;
+
+    printf("[stop_motion] stop\n");
+    request_stop_base_motion();
+    return mlink_return_string("motion stopped");
 }
 
 static struct mlink_return_value dance_cb(
@@ -283,66 +299,83 @@ static struct mlink_return_value dance_cb(
     return mlink_return_string("dance started");
 }
 
-static void register_base_move_tool(mlink_server_t *server) {
+static void register_motion_tool(
+    mlink_server_t *server,
+    const char *name,
+    const char *description,
+    mlink_tool_callback_t callback) {
     mlink_property_list_t *props = mlink_property_list_create();
     mlink_tool_t *tool;
 
     if (!props) {
-        printf("Failed to create property list for base_move\n");
+        printf("Failed to create property list for %s\n", name);
         return;
     }
 
-    if (!mlink_property_list_add_string(props, "direction", "stop")) {
-        printf("Failed to configure base_move properties\n");
-        mlink_property_list_destroy(props);
-        return;
-    }
-
-    tool = mlink_tool_create(
-        "base_move",
-        "Control the mobile base. direction is one of: "
-        "forward/backward/left/right (short ~500ms). "
-        "Use stop to interrupt any running action.",
-        props,
-        base_move_cb,
-        NULL,
-        false);
+    tool = mlink_tool_create(name, description, props, callback, NULL, false);
+    mlink_property_list_destroy(props);
 
     if (!tool || !mlink_server_add_tool(server, tool)) {
-        printf("Failed to register base_move\n");
+        printf("Failed to register %s\n", name);
         if (tool) {
             mlink_tool_destroy(tool);
-        } else {
-            mlink_property_list_destroy(props);
         }
     }
 }
 
+static void register_move_forward_tool(mlink_server_t *server) {
+    register_motion_tool(
+        server,
+        "move_forward",
+        "Make the robot move forward briefly. Use for Chinese voice commands: "
+        "\"机器人前进\", \"前进\", \"向前\", \"往前走\".",
+        move_forward_cb);
+}
+
+static void register_move_backward_tool(mlink_server_t *server) {
+    register_motion_tool(
+        server,
+        "move_backward",
+        "Make the robot move backward briefly. Use for Chinese voice commands: "
+        "\"机器人后退\", \"后退\", \"向后\", \"往后退\".",
+        move_backward_cb);
+}
+
+static void register_turn_left_tool(mlink_server_t *server) {
+    register_motion_tool(
+        server,
+        "turn_left",
+        "Make the robot turn left briefly. Use for Chinese voice commands: "
+        "\"机器人向左转\", \"左转\", \"向左转\", \"往左转\".",
+        turn_left_cb);
+}
+
+static void register_turn_right_tool(mlink_server_t *server) {
+    register_motion_tool(
+        server,
+        "turn_right",
+        "Make the robot turn right briefly. Use for Chinese voice commands: "
+        "\"机器人向右转\", \"右转\", \"向右转\", \"往右转\".",
+        turn_right_cb);
+}
+
+static void register_stop_motion_tool(mlink_server_t *server) {
+    register_motion_tool(
+        server,
+        "stop_motion",
+        "Stop the robot's current action immediately, including dancing or turning. "
+        "Use for Chinese voice commands: \"机器人停止动作\", \"停止\", \"停下\", "
+        "\"停止跳舞\", \"别动\".",
+        stop_motion_cb);
+}
+
 static void register_dance_tool(mlink_server_t *server) {
-    mlink_property_list_t *props = mlink_property_list_create();
-    mlink_tool_t *tool;
-
-    if (!props) {
-        printf("Failed to create property list for dance\n");
-        return;
-    }
-
-    tool = mlink_tool_create(
+    register_motion_tool(
+        server,
         "dance",
-        "Long-running dance action (~120s). Use base_move(direction=stop) to interrupt.",
-        props,
-        dance_cb,
-        NULL,
-        false);
-
-    if (!tool || !mlink_server_add_tool(server, tool)) {
-        printf("Failed to register dance\n");
-        if (tool) {
-            mlink_tool_destroy(tool);
-        } else {
-            mlink_property_list_destroy(props);
-        }
-    }
+        "Make the robot dance for about 120 seconds. Use for Chinese voice commands: "
+        "\"机器人跳个舞\", \"跳个舞\", \"跳舞\".",
+        dance_cb);
 }
 
 static int run_device_server(void) {
@@ -357,8 +390,12 @@ static int run_device_server(void) {
         return 1;
     }
 
-    register_base_move_tool(server);
+    register_move_forward_tool(server);
+    register_move_backward_tool(server);
+    register_turn_left_tool(server);
+    register_turn_right_tool(server);
     register_dance_tool(server);
+    register_stop_motion_tool(server);
     if (!write_pid_file()) {
         request_stop_base_motion();
         mlink_server_destroy(server);
@@ -366,7 +403,8 @@ static int run_device_server(void) {
         return 1;
     }
 
-    printf("mlink_device_test registered tools: base_move, dance\n");
+    printf("mlink_device_test registered tools: move_forward, move_backward, "
+        "turn_left, turn_right, dance, stop_motion\n");
     printf("pid: %" PRId64 "\n", (int64_t)getpid());
     fflush(stdout);
 
