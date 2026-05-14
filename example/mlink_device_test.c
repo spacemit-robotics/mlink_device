@@ -327,8 +327,10 @@ static void register_move_forward_tool(mlink_server_t *server) {
     register_motion_tool(
         server,
         "move_forward",
-        "Make the robot move forward briefly. Use for Chinese voice commands: "
-        "\"机器人前进\", \"前进\", \"向前\", \"往前走\".",
+        "用途：当用户要求机器人向前移动时使用，例如："
+        "\"机器人前进\"、\"前进\"、\"向前\"、\"往前走\"。"
+        "效果：启动一次约 500 ms 的向前短距离运动；会替换当前正在执行的底盘动作。"
+        "不要用于持续导航、跳舞或停止动作。",
         move_forward_cb);
 }
 
@@ -336,8 +338,10 @@ static void register_move_backward_tool(mlink_server_t *server) {
     register_motion_tool(
         server,
         "move_backward",
-        "Make the robot move backward briefly. Use for Chinese voice commands: "
-        "\"机器人后退\", \"后退\", \"向后\", \"往后退\".",
+        "用途：当用户要求机器人向后移动时使用，例如："
+        "\"机器人后退\"、\"后退\"、\"向后\"、\"往后退\"。"
+        "效果：启动一次约 500 ms 的向后短距离运动；会替换当前正在执行的底盘动作。"
+        "不要用于持续导航、跳舞或停止动作。",
         move_backward_cb);
 }
 
@@ -345,8 +349,10 @@ static void register_turn_left_tool(mlink_server_t *server) {
     register_motion_tool(
         server,
         "turn_left",
-        "Make the robot turn left briefly. Use for Chinese voice commands: "
-        "\"机器人向左转\", \"左转\", \"向左转\", \"往左转\".",
+        "用途：当用户要求机器人向左转向时使用，例如："
+        "\"机器人向左转\"、\"左转\"、\"向左转\"、\"往左转\"。"
+        "效果：启动一次约 500 ms 的向左短暂转向；会替换当前正在执行的底盘动作。"
+        "不要用于持续导航、跳舞或停止动作。",
         turn_left_cb);
 }
 
@@ -354,8 +360,10 @@ static void register_turn_right_tool(mlink_server_t *server) {
     register_motion_tool(
         server,
         "turn_right",
-        "Make the robot turn right briefly. Use for Chinese voice commands: "
-        "\"机器人向右转\", \"右转\", \"向右转\", \"往右转\".",
+        "用途：当用户要求机器人向右转向时使用，例如："
+        "\"机器人向右转\"、\"右转\"、\"向右转\"、\"往右转\"。"
+        "效果：启动一次约 500 ms 的向右短暂转向；会替换当前正在执行的底盘动作。"
+        "不要用于持续导航、跳舞或停止动作。",
         turn_right_cb);
 }
 
@@ -363,9 +371,10 @@ static void register_stop_motion_tool(mlink_server_t *server) {
     register_motion_tool(
         server,
         "stop_motion",
-        "Stop the robot's current action immediately, including dancing or turning. "
-        "Use for Chinese voice commands: \"机器人停止动作\", \"停止\", \"停下\", "
-        "\"停止跳舞\", \"别动\".",
+        "用途：当用户要求机器人停止当前动作时使用，例如："
+        "\"机器人停止动作\"、\"停止\"、\"停下\"、\"停止跳舞\"、\"别动\"。"
+        "效果：立即停止当前运动，包括前进、后退、转向或跳舞。"
+        "不要用于启动新的移动、转向或跳舞动作。",
         stop_motion_cb);
 }
 
@@ -373,8 +382,10 @@ static void register_dance_tool(mlink_server_t *server) {
     register_motion_tool(
         server,
         "dance",
-        "Make the robot dance for about 120 seconds. Use for Chinese voice commands: "
-        "\"机器人跳个舞\", \"跳个舞\", \"跳舞\".",
+        "用途：当用户要求机器人跳舞时使用，例如："
+        "\"机器人跳个舞\"、\"跳个舞\"、\"跳舞\"。"
+        "效果：启动一次约 120 秒的跳舞动作；可通过停止动作中断。"
+        "不要用于普通移动、转向或停止动作。",
         dance_cb);
 }
 
