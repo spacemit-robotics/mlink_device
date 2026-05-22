@@ -98,10 +98,9 @@ endif()
 
 # =========================
 # Tests (optional, controlled by MLINK_DEVICE_BUILD_TESTS)
-# Implemented in test/CMakeLists.txt
+# Implemented in tests/CMakeLists.txt
 # =========================
 if(MLINK_DEVICE_BUILD_TESTS)
-    add_subdirectory(test)
+    add_subdirectory(tests)
 endif()
-
 
