@@ -1,0 +1,51 @@
+module: components/agent_tools/mlink_device
+
+tests:
+  - name: mlink-device-api-contract
+    description: Verifies public C API behavior for properties, return values, tools and duplicate registration.
+    category: functional
+    scopes: [pr, scheduled]
+    timeout_s: 60
+    workdir: sdk
+    requires:
+      files:
+        - output/staging/bin/mlink_device_api_contract_test
+    command: |
+      "${SROBOTIS_OUTPUT_STAGING}/bin/mlink_device_api_contract_test"
+
+  - name: mlink-device-protocol-e2e
+    description: Verifies mlink JSON-RPC initialize, tools/list, tools/call and error handling.
+    category: functional
+    scopes: [pr, scheduled]
+    timeout_s: 60
+    workdir: sdk
+    requires:
+      files:
+        - output/staging/bin/mlink_device_protocol_e2e_test
+    command: |
+      "${SROBOTIS_OUTPUT_STAGING}/bin/mlink_device_protocol_e2e_test"
+
+  - name: mlink-device-lifecycle
+    description: Verifies repeated initialize, tools/list and tools/call cycles without hardware.
+    category: stability
+    scopes: [pr, scheduled]
+    timeout_s: 60
+    workdir: sdk
+    requires:
+      files:
+        - output/staging/bin/mlink_device_lifecycle_test
+    command: |
+      "${SROBOTIS_OUTPUT_STAGING}/bin/mlink_device_lifecycle_test"
+
+  - name: mlink-device-daemon-lifecycle
+    description: Verifies installed mlink_device_test daemon start, status, restart and stop lifecycle.
+    category: stability
+    scopes: [scheduled]
+    timeout_s: 120
+    workdir: sdk
+    requires:
+      commands: [bash]
+      files:
+        - output/staging/bin/mlink_device_test
+    command: |
+      bash components/agent_tools/mlink_device/tests/test_device_daemon_lifecycle.sh
